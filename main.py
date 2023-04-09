@@ -28,11 +28,11 @@ def view_img(img):
 
 class InstancesFinder():
 
-    def __init__(self, old_matrix):      
+    def __init__(self, old_matrix, kernel):      
        
         # super(MetaParameters, self).__init__()
 
-        self.kernel_sz = 144
+        self.kernel_sz = kernel
         self.old_matrix = old_matrix
         self.extraSymbol = 4
         self.symbols = list(range(2))
@@ -40,7 +40,7 @@ class InstancesFinder():
         self.queue = []
         self.clusters = []
         self.min_distance = 1
-        self.min_cluster_size = 4
+        self.min_cluster_size = 2
 
         # Очередь из символов для поиска кластера
         self.directionsCluster = self.direction_cluster_genertor()
@@ -118,22 +118,14 @@ class InstancesFinder():
     def new_instance_matrix(self):
 
         main_matrix = []
-        new_matrix = np.copy(self.old_matrix)
-        cluster = self.findClusters()
-
-        for i in range(len(cluster[:])):
-            for j in range(1, len(cluster[i]['coords'])):
-                
-                new_layer = self.layer + i + 10 # i - from 0 to count of found classes
-                coord_ = cluster[i]['coords'][j]         
-                new_matrix[coord_[0]][coord_[1]] = new_layer
+        new_matrix = np.copy(self.new_matrix())
 
         shp_old = new_matrix.shape
 
         for lyr in np.unique(new_matrix):
             matrix = np.copy(new_matrix)
 
-            if lyr <3:
+            if lyr < 3:
                 matrix[matrix != lyr] = 0
                 main_matrix.append(matrix)
             elif lyr >= 13: 
@@ -145,6 +137,7 @@ class InstancesFinder():
         
         shp_new =  main_matrix.shape
         print(f'Matrix shape was changed from {shp_old} to {shp_new}')
+        # print(main_matrix)
 
         return main_matrix
 
@@ -155,8 +148,8 @@ class InstancesFinder():
 
         for i in range(len(cluster[:])):
             for j in range(1, len(cluster[i]['coords'])):
-                
-                new_layer = self.layer + i # i - from 0 to count of found classes
+
+                new_layer = self.layer + i + 10 # i - from 0 to count of found classes
                 coord_ = cluster[i]['coords'][j]         
                 new_matrix[coord_[0]][coord_[1]] = new_layer
                 
@@ -170,7 +163,7 @@ if __name__ == "__main__":
                 [1, 0, 1, 3, 3, 3, 1, 0, 1],
                 [1, 1, 0, 0, 1, 1, 0, 1, 3],
                 [1, 1, 0, 1, 3, 3, 3, 1, 3],
-                [1, 1, 0, 1, 1, 3, 0, 1, 0],
+                [1, 1, 0, 1, 1, 3, 3, 1, 0],
                 [0, 3, 1, 0, 1, 0, 0, 0, 1],
                 [0, 3, 3, 2, 2, 0, 3, 1, 1],
                 [0, 0, 2, 2, 2, 1, 1, 1, 0]
@@ -178,9 +171,9 @@ if __name__ == "__main__":
 
     matrix = view_matrix(read_nii("path to nifti"))
     old_matrix = matrix[:,:,6]
-    new_instance_matrix = InstancesFinder(old_matrix).new_instance_matrix()
-
-    new_matrix = InstancesFinder(old_matrix).new_matrix()
+    new_instance_matrix = InstancesFinder(old_matrix, kernel = 192).new_instance_matrix()
+    new_matrix = InstancesFinder(old_matrix, kernel = 192).new_matrix()
+    print(new_instance_matrix)
     view_img(new_matrix)
 
 
