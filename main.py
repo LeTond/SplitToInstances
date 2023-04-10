@@ -30,17 +30,15 @@ class InstancesFinder():
 
     def __init__(self, old_matrix, kernel):      
        
-        # super(MetaParameters, self).__init__()
-
         self.kernel_sz = kernel
         self.old_matrix = old_matrix
-        self.extraSymbol = 4
+        self.extraSymbol = 99
         self.symbols = list(range(2))
         self.layer = 3
         self.queue = []
         self.clusters = []
         self.min_distance = 1
-        self.min_cluster_size = 2
+        self.min_cluster_size = 5
 
         # Очередь из символов для поиска кластера
         self.directionsCluster = self.direction_cluster_genertor()
@@ -106,7 +104,7 @@ class InstancesFinder():
                                 pass
                     
                 # Берем только те кластеры, у которых длина больше 5 (учитывая extra)
-                if (len(clusterData['coords']) + len(clusterData['extras']) >= self.min_cluster_size):
+                if (len(clusterData['coords']) + len(clusterData['extras']) >= (self.min_cluster_size + 1)):
                     clusterData['symbol'] = self.layer
                     self.clusters.append(clusterData)
                 # Снимаем пометки с extra текущего кластера, тк они могут быть частью и других кластеров
@@ -137,7 +135,6 @@ class InstancesFinder():
         
         shp_new =  main_matrix.shape
         print(f'Matrix shape was changed from {shp_old} to {shp_new}')
-        # print(main_matrix)
 
         return main_matrix
 
@@ -169,12 +166,14 @@ if __name__ == "__main__":
                 [0, 0, 2, 2, 2, 1, 1, 1, 0]
                 ]
 
-    matrix = view_matrix(read_nii("path to nifti"))
-    old_matrix = matrix[:,:,6]
-    new_instance_matrix = InstancesFinder(old_matrix, kernel = 192).new_instance_matrix()
-    new_matrix = InstancesFinder(old_matrix, kernel = 192).new_matrix()
-    print(new_instance_matrix)
-    view_img(new_matrix)
+    image_matrix = view_matrix(read_nii("path to nifti"))
+    image_matrix = image_matrix[:,:,6]
+    new_instance_matrix = InstancesFinder(image_matrix, kernel = 192).new_instance_matrix()
+    
+    new_matrix = InstancesFinder(old_matrix, kernel = 9).new_matrix()
+    
+    print(new_matrix)
+    view_img(new_instance_matrix)
 
 
 
